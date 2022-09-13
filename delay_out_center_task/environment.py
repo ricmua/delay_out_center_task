@@ -60,10 +60,14 @@ class Environment:
     >>> environment = Environment()
     
     Verify that a `cursor` object has been initialized in the environment, that 
-    the object is a unit sphere, and that it is positioned at the origin.
+    the object is a unit sphere, that it is positioned at the origin, and that 
+    it is opaque and colored black.
     
-    >>> environment.objects
-    {'cursor': {'radius': 1.0, 'position': (0.0, 0.0, 0.0)}}
+    >>> import pprint
+    >>> pprint.pp(environment.objects)
+    {'cursor': {'radius': 1.0,
+                'position': (0.0, 0.0, 0.0),
+                'color': (0.0, 0.0, 0.0, 1.0)}}
     
     Initialize a target sphere, and verify that the two spheres overlap.
     
@@ -111,6 +115,15 @@ class Environment:
     >>> environment.is_engaged('target')
     False
     
+    Change the RGBA color of the cursor and target.
+    
+    >>> environment.get_color()
+    (0.0, 0.0, 0.0, 1.0)
+    >>> environment.set_color(0.0, 1.0, 0.0)
+    >>> environment.set_color(b=1.0, a=0.5, key='target')
+    >>> environment.get_color()
+    (0.0, 1.0, 0.0, 1.0)
+    
     """
     
     def __init__(self):
@@ -140,6 +153,7 @@ class Environment:
         self.objects[key] = {}
         self.set_radius(key=key)
         self.set_position(key=key)
+        self.set_color(key=key)
     
     def destroy_sphere(self, key='cursor'):
         """ Destroy a sphere object.
@@ -200,6 +214,36 @@ class Environment:
         """
         assert key in self.objects
         self.objects[key]['position'] = (x, y, z)
+        
+    def get_color(self, key='cursor'):
+        """ Get the current color of a sphere object.
+        
+        Parameters
+        ----------
+        key : string
+            Key or label used to identify the object.
+        
+        Returns
+        -------
+        rgba : tuple of floats
+            A 4-tuple of RGB and alpha values.
+        """
+        return self.objects[key]['color']
+        
+    def set_color(self, r=0.0, g=0.0, b=0.0, a=1.0, key='cursor'):
+        """ Set the current color of a sphere object.
+        
+        Parameters
+        ----------
+        r, g, b : float
+            Red, green, and blue intensity values.
+        a : float
+            Alpha (transparency) value.
+        key : string
+            Key or label used to identify a sphere object.
+        """
+        assert key in self.objects
+        self.objects[key]['color'] = (r, g, b, a)
         
     def is_engaged(self, key='target', other='cursor'):
         """ Tests whether or not a sphere overlaps with, or touches, another 

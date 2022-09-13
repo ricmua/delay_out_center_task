@@ -45,6 +45,8 @@ default attribute values.
 1.0
 >>> environment.get_position('cursor')
 (0.0, 0.0, 0.0)
+>>> environment.get_color('cursor')
+(0.0, 0.0, 0.0, 1.0)
 
 No other objects should be present in the environment, at this time, but 
 spheres can be initialized and destroyed when required. Verify this mechanism.
@@ -87,13 +89,15 @@ True
 When the model is activated, a block of trials commences. At this time, the 
 model loads a list of target parameter records. Each trial of the task 
 represents an opportunity for a subject to move to a new target chosen from 
-this list. Verify the target set.
+this list. The color of the cursor is also set. Verify the target set.
 
 >>> model.on_exit_inactive()
 >>> len(model.targets)
 6
 >>> model.targets[0]['position']
 (1.0, 0.0, 0.0)
+>>> environment.get_color()
+(0.0, 1.0, 0.0, 1.0)
 
 The intertrial period is a brief delay between trials, during which the user is 
 not provided with any prompts or expected to take any directed actions. Verify 
@@ -109,7 +113,7 @@ Before a trial begins, the task model chooses a behavioral objective and
 prepares the environment. Verify that a new target is initialized in the 
 environment, and that new behavioral target parameters are chosen. Also confirm 
 that the model manually requests a transition to the `move_a` state, once the 
-trial is set up.
+trial is set up. The target is colored blue, with partial transparency.
 
 >>> target_index = model.target_index
 >>> environment.exists('target')
@@ -119,6 +123,8 @@ False
 True
 >>> model.target_index == target_index
 False
+>>> environment.get_color('target')
+(0.0, 0.0, 1.0, 0.5)
 
 The first trial state in this task is the `move_a` state. During this state, a 
 target is presented to the user at a "home" or "center" position. Here, the 
@@ -153,7 +159,7 @@ transition into the `delay_a` state. This is an imposed behavioral delay. At
 the start of the delay period, a "cue" target is initialized at some new 
 position. However, the user is expected to maintain engagement the home target 
 for the duration of the `delay_a` state. The cue disappears as the state 
-expires.
+expires. The cue is colored red, with partial transparency.
 
 >>> environment.exists('cue')
 False
@@ -163,6 +169,8 @@ Trigger: timeout
 True
 >>> environment.exists('cue')
 True
+>>> environment.get_color('cue')
+(1.0, 0.0, 0.0, 0.5)
 >>> environment.get_position('cue') == environment.get_position('target')
 False
 >>> model.on_exit_delay_a()
@@ -434,7 +442,12 @@ class Model:
         
     def on_exit_inactive(self, event_data=None):
         """ Terminate the "inactive" state. """
+        
+        # Load the set of possible targets.
         self.load_targets()
+        
+        # Set the cursor color.
+        self.environment.set_color(g=1.0, key='cursor')
         
     def on_enter_intertrial(self, event_data=None):
         """ Initialize the "intertrial" state.
@@ -468,6 +481,9 @@ class Model:
         
         # Create the target.
         self.environment.initialize_sphere('target')
+        
+        # Set the target color.
+        self.environment.set_color(b=1.0, a=0.5, key='target')
         
         # Set a random target index.
         self.target_index = self.choose_random_target_index()
@@ -530,7 +546,10 @@ class Model:
         # Set the cue position.
         target = self.targets[self.target_index]
         xyz = target['position']
-        self.environment.set_target_position(*xyz, key='cue')
+        self.environment.set_position(*xyz, key='cue')
+        
+        # Set the cue color.
+        self.environment.set_color(r=1.0, a=0.5, key='cue')
         
     def on_exit_delay_a(self, event_data=None):
         """ Terminate the "delay_a" state. """
