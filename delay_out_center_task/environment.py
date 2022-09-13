@@ -201,68 +201,22 @@ class Environment:
         assert key in self.objects
         self.objects[key]['position'] = (x, y, z)
         
-        
-        
-    # The remaining functions should be removed or replaced, when possible.
-        
-        
-        
-    def set_target_radius(self, radius=0.0, key='target'):
-        """ Set the current size of the target sphere.
-        
-        Parameters
-        ----------
-        radius : float
-            Size of the target sphere.
-        key : string
-            Key or label used to identify a target.
-        """
-        self.radius[key] = radius
-        
-    def set_target_position(self, *args, key='target', **kwargs):
-        """ Set the current position of the target in behavioral space.
-        
-        Parameters
-        ----------
-        x : float
-            First position coordinate.
-        y : float
-            Second position coordinate.
-        z : float
-            Third position coordinate.
-        key : string
-            Key or label used to identify a target.
-        """
-        self.set_position(*args, key=key, **kwargs)
-
-    def set_cursor_position(self, x=0.0, y=0.0, z=0.0):
-        """ Set the current position of the cursor in behavioral space.
-        
-        Parameters
-        ----------
-        x : float
-            First position coordinate.
-        y : float
-            Second position coordinate.
-        z : float
-            Third position coordinate.
-        """
-        self.set_position(*args, key='cursor', **kwargs)
-        
-    def is_engaged(self, key='target'):
-        """ Tests whether or not the cursor overlaps with, or touches, a target 
+    def is_engaged(self, key='target', other='cursor'):
+        """ Tests whether or not a sphere overlaps with, or touches, another 
             sphere.
         
         Parameters
         ----------
-        key : string
-            Key or label used to identify a target.
+        key : string, optional
+            Key or label used to identify a sphere. Defaults to 'target'.
+        other : string, optional
+            Key or label used to identify a second sphere. Defaults to 'cursor'.
         """
         p_t = self.objects[key]['position']
-        p_c = self.objects['cursor']['position']
+        p_c = self.objects[other]['position']
         d = sum([(t-c)**2 for (t, c) in zip(p_t, p_c)])
         r_t = self.objects[key]['radius']
-        r_c = self.objects['cursor']['radius']
+        r_c = self.objects[other]['radius']
         
         return d <= (r_t + r_c)**2
     
