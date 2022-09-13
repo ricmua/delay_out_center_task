@@ -342,7 +342,7 @@ class Model:
         set_default('timeout_s.move_c',     1.000)
         set_default('timeout_s.hold_c',     0.500)
         set_default('timeout_s.failure',    0.200)
-        set_default('timeout_s.success',    0.000)
+        set_default('timeout_s.success',    0.010)
         set_default('timeout_s.intertrial', 0.010)
         
         # Set target file path.
