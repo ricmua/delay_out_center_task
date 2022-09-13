@@ -58,6 +58,19 @@ targets are positioned near the periphery. The user is expected to hold for a
 short interval at each target, and to wait for a short delay interval after the 
 initial presentation of the outer target.
 
+## Installation
+
+The package can be used as-is, so long as the [Python path] is set 
+appropriately.
+                 
+However, a ``setup.cfg`` file has been provided, to facilitate package 
+installation via [setuptools]. Package installation can be accomplished via the 
+command:
+
+```
+pip install path/to/delay_out_center_task
+```
+
 ## Modifications
 
 This task framework is intended to be forked and extended. Please 
@@ -417,5 +430,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 [Unity3D]: https://en.wikipedia.org/wiki/Unity_(game_engine)
 
 [unity_spheres_environment]: https://github.com/ricmua/unity_spheres_environment
+
+[setuptools]: https://setuptools.pypa.io/en/latest/userguide/quickstart.html#basic-use
 
 
