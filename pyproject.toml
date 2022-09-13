@@ -1,0 +1,24 @@
+[project]
+name = "delay_out_center_task"
+description = "State machine and model for a cursor-based center-out, out-center behavioral task, with a delay period after the initial hold."
+authors = [
+  {name='a.whit', email='nml@whit.contact'},
+]
+readme="README.md"
+license = { file="LICENSE.txt" }
+requires-python = ">=3.7"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+  "Intended Audience :: Science/Research",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Homepage" = "https://github.com/ricmua/delay_out_center_task"
+
+
+
