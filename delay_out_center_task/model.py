@@ -93,7 +93,7 @@ this list. The color of the cursor is also set. Verify the target set.
 
 >>> model.on_exit_inactive()
 >>> len(model.targets)
-6
+8
 >>> model.targets[0]['position']
 (1.0, 0.0, 0.0)
 >>> environment.get_color()
@@ -270,12 +270,14 @@ default_targets \
      dict(position=(-1.0, -0.0, +0.0)),
      dict(position=(-0.0, -1.0, +0.0)),
      dict(position=(-1.0, -1.0, +0.0)),
+     dict(position=(+1.0, -1.0, +0.0)),
+     dict(position=(-1.0, +1.0, +0.0)),
     ]
 """ Default center-out, out-center target set, with outer targets positioned 
-    at the corners of a square.
+    at the corners and faces of a square.
 
-This default set defines "outer" targets at the corners of a square centered at 
-the origin. This is useful for basic task operations and testing.
+This default set defines "outer" targets at the corners and faces of a square 
+centered at the origin. This is useful for basic task operations and testing.
 
 This also serves as an example of the structure expected in the YAML file 
 stored at the path specified by the optional parameter `paths.target_file`.
