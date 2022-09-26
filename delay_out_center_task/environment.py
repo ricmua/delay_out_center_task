@@ -126,13 +126,13 @@ class Environment:
     
     """
     
-    def __init__(self):
+    def __init__(self, timer=Timer):
         
         # Initialize the spherical object attributes.
         self.objects = {}
         
         # Initialize a timer callable.
-        self.timer = Timer
+        self.timer = timer
         
         # Initialize a cursor object.
         self.initialize_sphere()
