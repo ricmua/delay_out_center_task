@@ -65,11 +65,17 @@ appropriately.
                  
 However, a ``setup.cfg`` file has been provided, to facilitate package 
 installation via [setuptools]. Package installation can be accomplished via the 
-command:
+[pip install] command:
 
 ```
 pip install path/to/delay_out_center_task
 ```
+
+### Testing
+
+Once installed, 
+
+At present, the [doctest]s in this document are the only tests available.
 
 ## Modifications
 
@@ -434,4 +440,6 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 [setuptools]: https://setuptools.pypa.io/en/latest/userguide/quickstart.html#basic-use
 
 [neuromechatronics]: https://www.meche.engineering.cmu.edu/faculty/neuromechatronics-lab.html
+
+[pip install]: https://pip.pypa.io/en/stable/cli/pip_install/
 
