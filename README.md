@@ -433,4 +433,5 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 [setuptools]: https://setuptools.pypa.io/en/latest/userguide/quickstart.html#basic-use
 
+[neuromechatronics]: https://www.meche.engineering.cmu.edu/faculty/neuromechatronics-lab.html
 
