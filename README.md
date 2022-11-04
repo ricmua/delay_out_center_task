@@ -455,3 +455,6 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 [pip install]: https://pip.pypa.io/en/stable/cli/pip_install/
 
+[pytest]: https://docs.pytest.org/
+
+
