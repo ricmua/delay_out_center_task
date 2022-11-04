@@ -71,11 +71,23 @@ installation via [setuptools]. Package installation can be accomplished via the
 pip install path/to/delay_out_center_task
 ```
 
+The update and user flags are common options that can be added to the command:
+
+```
+pip install -U --user path/to/delay_out_center_task
+```
+
 ### Testing
 
-Once installed, 
+Once installed, the [pytest] framework can be used to verify that the package 
+is functioning as expected.
 
-At present, the [doctest]s in this document are the only tests available.
+```
+python -m pytest path/to/delay_out_center_task
+```
+
+The output of this command should indicate that all tests passed. At present, 
+the [doctest]s in this document are the only tests available.
 
 ## Modifications
 
