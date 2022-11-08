@@ -411,7 +411,9 @@ get to know the task framework is to clone a copy and mess around.
 Copyright 2022 [Neuromechatronics Lab][neuromechatronics], 
 Carnegie Mellon University
 
-Created by: a. whit. (nml@whit.contact)
+Contributors: 
+
+* a. whit. (nml@whit.contact)
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
