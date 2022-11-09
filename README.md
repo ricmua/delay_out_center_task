@@ -80,14 +80,20 @@ pip install -U --user path/to/delay_out_center_task
 ### Testing
 
 Once installed, the [pytest] framework can be used to verify that the package 
-is functioning as expected.
+is functioning as expected, by running the doctests in this README.
 
 ```
 python -m pytest path/to/delay_out_center_task
 ```
 
-The output of this command should indicate that all tests passed. At present, 
-the [doctest]s in this document are the only tests available.
+The output of this command should indicate that all tests passed. 
+
+Alternatively -- or in addition -- the [unittest] framework can be used to run 
+similar, but slightly more systematic tests.
+
+```bash
+python test/test_trial_sequences.py
+```
 
 ## Modifications
 
@@ -459,4 +465,5 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 [pytest]: https://docs.pytest.org/
 
+[unittest]: https://docs.python.org/3/library/unittest.html
 
