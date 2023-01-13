@@ -317,6 +317,11 @@ class Model:
         self.initialize_parameters(parameters)
         self.load_targets()
         
+        self.set_timeout(1)
+        self.cancel_timeout()
+        
+    def __del__(self): self.cancel_timeout()
+        
     def initialize_parameters(self, parameters):
         """ Declare and set defaults for all parameters used in the cursor task.
         
@@ -346,7 +351,7 @@ class Model:
         set_default('timeout_s.intertrial', 0.010)
         
         # Set target file path.
-        set_default('paths.targets', None) #'config/targets.yaml')
+        set_default('paths.targets', '') #None) #'config/targets.yaml')
         
     def set_parameterized_timeout(self, key, **kwargs):
         """ Request that the timer invoke the timeout callback after a delay 
@@ -386,7 +391,8 @@ class Model:
         """ Cancel any timeout timer that might be set. """
         
         # Cancel the timer if it is set.
-        if self.timeout_timer.is_alive(): self.timeout_timer.cancel()
+        if hasattr(self, 'timeout_timer'):
+            if self.timeout_timer.is_alive(): self.timeout_timer.cancel()
         
     def timeout(self, *args, **kwargs):
         """ Timeout trigger function. """
