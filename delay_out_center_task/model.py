@@ -350,6 +350,18 @@ class Model:
         set_default('timeout_s.success',    0.010)
         set_default('timeout_s.intertrial', 0.010)
         
+        # Initialize default sphere parameters.
+        set_default('cursor.radius',  0.1)
+        set_default('cursor.color.r', 0.0)
+        set_default('cursor.color.g', 1.0)
+        set_default('cursor.color.b', 0.0)
+        set_default('cursor.color.a', 1.0)
+        set_default('target.radius',  0.2)
+        set_default('target.color.r', 0.0)
+        set_default('target.color.g', 0.0)
+        set_default('target.color.b', 1.0)
+        set_default('target.color.a', 0.5)
+        
         # Set target file path.
         set_default('paths.targets', '') #None) #'config/targets.yaml')
         
@@ -440,6 +452,7 @@ class Model:
         
         # Move the target to the home position.
         # For now, this is hard-coded as the origin.
+        # In the future, it can be made part of the configuration.
         target = dict(position=(0.0, 0.0, 0.0))
         xyz = target['position']
         self.environment.set_position(*xyz, key='target')
@@ -455,7 +468,13 @@ class Model:
         self.load_targets()
         
         # Set the cursor color.
-        self.environment.set_color(g=1.0, key='cursor')
+        keys = ['r', 'g', 'b', 'a']
+        rgba_map = {k: self.parameters[f'cursor.color.{k}'] for k in keys}
+        self.environment.set_color(**rgba_map, key='cursor')
+        
+        # Set the cursor radius.
+        radius = self.parameters[f'cursor.radius']
+        self.environment.set_radius(radius, key='cursor')
         
     def on_enter_intertrial(self, event_data=None):
         """ Initialize the "intertrial" state.
@@ -490,9 +509,6 @@ class Model:
         # Create the target.
         self.environment.initialize_sphere('target')
         
-        # Set the target color.
-        self.environment.set_color(b=1.0, a=0.5, key='target')
-        
         # Set a random target index.
         self.target_index = self.choose_random_target_index()
         
@@ -517,6 +533,17 @@ class Model:
     
     def on_enter_move_a(self, event_data=None):
         """ Initialize the "move_a" state. """
+        
+        # Set the default target color.
+        # Reconsider how this is handled for the home target.
+        keys = ['r', 'g', 'b', 'a']
+        rgba_map = {k: self.parameters[f'target.color.{k}'] for k in keys}
+        self.environment.set_color(**rgba_map, key='target')
+        
+        # Set the default target radius.
+        # Reconsider how this is handled for the home target.
+        radius = self.parameters[f'target.radius']
+        self.environment.set_radius(radius, key='target')
         
         # Move the target to the home position.
         self.set_home_target()
@@ -545,19 +572,32 @@ class Model:
     def on_enter_delay_a(self, event_data=None):
         """ Initialize the "delay_a" state. """
         
-        # Set the timeout timer.
-        self.set_parameterized_timeout('delay_a')
-        
         # Initialize the cue.
         self.environment.initialize_sphere('cue')        
         
-        # Set the cue position.
+        # Initialize shorthand.
         target = self.targets[self.target_index]
+        
+        # Set the cue position.
         xyz = target['position']
         self.environment.set_position(*xyz, key='cue')
         
+        # Set the cue radius.
+        # Set to the radius of the active target, if specified.
+        # Otherwise, set to the default target radius.
+        radius = target.get('radius', self.parameters['target.radius'])
+        self.environment.set_radius(radius, key='cue')
+        
         # Set the cue color.
-        self.environment.set_color(r=1.0, a=0.5, key='cue')
+        # Set to the color of the active target, if specified.
+        # Otherwise, set to the default target color.
+        keys = ['r', 'g', 'b', 'a']
+        rgba_map = {k: self.parameters[f'target.color.{k}'] for k in keys}
+        rgba_map = target.get('color', rgba_map)
+        self.environment.set_color(**rgba_map, key='cue')
+        
+        # Set the timeout timer.
+        self.set_parameterized_timeout('delay_a')
         
     def on_exit_delay_a(self, event_data=None):
         """ Terminate the "delay_a" state. """
