@@ -263,7 +263,7 @@ import numpy.random
 
 
 # Define the default target set.
-default_targets \
+default_targets_list \
   = [dict(position=(+1.0, +0.0, +0.0)),
      dict(position=(+0.0, +1.0, +0.0)),
      dict(position=(+1.0, +1.0, +0.0)),
@@ -273,6 +273,7 @@ default_targets \
      dict(position=(+1.0, -1.0, +0.0)),
      dict(position=(-1.0, +1.0, +0.0)),
     ]
+default_targets = {n: v for (n, v) in enumerate(default_targets_list)}
 """ Default center-out, out-center target set, with outer targets positioned 
     at the corners and faces of a square.
 
@@ -429,13 +430,20 @@ class Model:
             target records.
         """
         
+        # Set the default.
+        self.targets = default_targets
+        
         # Load targets from a YAML file, if a file path is provided.
         filepath = filepath \
                    if filepath \
                    else self.parameters.get('file_path.targets', None)
-        self.targets = yaml.safe_load(filepath) \
-                       if filepath \
-                       else default_targets
+        if filepath:
+            with open(filepath, 'r') as f: self.targets = yaml.safe_load(f)
+        
+        # Report.
+        message = f'Loaded targets from {filepath}'
+        message = message if filepath else 'Using default targets'
+        self.log(message)
         
         # Set a random target index.
         self.target_index = None #self.choose_random_target_index()
@@ -465,7 +473,7 @@ class Model:
         """ Terminate the "inactive" state. """
         
         # Load the set of possible targets.
-        self.load_targets()
+        self.load_targets(filepath=self.parameters['paths.targets'])
         
         # Set the cursor color.
         keys = ['r', 'g', 'b', 'a']
@@ -576,11 +584,13 @@ class Model:
         self.environment.initialize_sphere('cue')        
         
         # Initialize shorthand.
-        target = self.targets[self.target_index]
+        target_key = list(self.targets)[self.target_index]
+        target = self.targets[target_key]
+        self.log(f'Setting target cue: {target_key}')
         
         # Set the cue position.
         xyz = target['position']
-        self.environment.set_position(*xyz, key='cue')
+        self.environment.set_position(**xyz, key='cue')
         
         # Set the cue radius.
         # Set to the radius of the active target, if specified.
@@ -611,10 +621,34 @@ class Model:
     def on_enter_move_b(self, event_data=None):
         """ Initialize the "move_b" state. """
         
-        # Set the outer target position.
-        target = self.targets[self.target_index]
+        ## Set the outer target position.
+        #target_key = list(self.targets)[self.target_index]
+        #target = self.targets[target_key]
+        #xyz = target['position']
+        #self.environment.set_position(**xyz, key='target')
+        
+        # Initialize shorthand.
+        target_key = list(self.targets)[self.target_index]
+        target = self.targets[target_key]
+        #self.log(f'Setting target: {target_key}')
+        
+        # Set the target position.
         xyz = target['position']
-        self.environment.set_position(*xyz, key='target')
+        self.environment.set_position(**xyz, key='target')
+        
+        # Set the target radius.
+        # Set to the radius of the active target, if specified.
+        # Otherwise, set to the default target radius.
+        radius = target.get('radius', self.parameters['target.radius'])
+        self.environment.set_radius(radius, key='target')
+        
+        # Set the target color.
+        # Set to the color of the active target, if specified.
+        # Otherwise, set to the default target color.
+        keys = ['r', 'g', 'b', 'a']
+        rgba_map = {k: self.parameters[f'target.color.{k}'] for k in keys}
+        rgba_map = target.get('color', rgba_map)
+        self.environment.set_color(**rgba_map, key='target')
         
         # Set the timeout timer.
         self.set_parameterized_timeout('move_b')
