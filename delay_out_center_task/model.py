@@ -248,7 +248,7 @@ False
 The task then moves to the inter-trial state, and then to a new trial.
 """
 
-# Copyright 2022 Carnegie Mellon University Neuromechatronics Lab (a.whit)
+# Copyright 2022-2023 Carnegie Mellon University Neuromechatronics Lab (a.whit)
 # 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -467,7 +467,12 @@ class Model:
         
     def on_enter_inactive(self, event_data=None):
         """ Initialize the "inactive" state. """
-        pass
+        
+        # Destroy all objects in the environment, except the cursor.
+        keys = [k for k in self.environment if (k != 'cursor')]
+        for k in keys: self.environment.destroy_object(k)
+        
+        #pass
         
     def on_exit_inactive(self, event_data=None):
         """ Terminate the "inactive" state. """
