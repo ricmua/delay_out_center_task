@@ -349,7 +349,7 @@ class Model:
         set_default('timeout_s.hold_c',     0.500)
         set_default('timeout_s.failure',    0.200)
         set_default('timeout_s.success',    0.010)
-        set_default('timeout_s.intertrial', 0.010)
+        set_default('timeout_s.intertrial', 0.005)
         
         # Initialize default sphere parameters.
         set_default('cursor.radius',  0.1)
@@ -465,11 +465,60 @@ class Model:
         xyz = target['position']
         self.environment.set_position(*xyz, key='target')
         
+    def update_cursor_radius(self):
+        """ Update the cursor radius in the environment to match the current 
+            parameter value.
+        """
+        radius = self.parameters[f'cursor.radius']
+        self.environment.set_radius(radius, key='cursor')
+        
+    def update_cursor_color(self):
+        """ Update the cursor color in the environment to match the current 
+            parameter value.
+        """
+        keys = ['r', 'g', 'b', 'a']
+        rgba_map = {k: self.parameters[f'cursor.color.{k}'] for k in keys}
+        self.environment.set_color(**rgba_map, key='cursor')
+    
+    def update_target_radius(self, key='target', from_active_target=True):
+        """ Update the target radius in the environment to match the current 
+            active target, or default to the current parameter value.
+        """
+        
+        # Initialize shorthand.
+        target_key = list(self.targets)[self.target_index]
+        target_key = target_key if from_active_target else None
+        target = self.targets.get(target_key, {})
+        
+        # Set the target radius.
+        # Set to the radius of the active target, if specified.
+        # Otherwise, set to the default target radius.
+        radius = target.get('radius', self.parameters['target.radius'])
+        self.environment.set_radius(radius, key=key)
+        
+    def update_target_color(self, key='target', from_active_target=True):
+        """ Update the target color in the environment to match the current 
+            active target, or default to the current parameter value.
+        """
+        
+        # Initialize shorthand.
+        target_key = list(self.targets)[self.target_index]
+        target_key = target_key if from_active_target else None
+        target = self.targets.get(target_key, {})
+        
+        # Set the target color.
+        # Set to the color of the active target, if specified.
+        # Otherwise, set to the default target color.
+        keys = ['r', 'g', 'b', 'a']
+        rgba_map = {k: self.parameters[f'target.color.{k}'] for k in keys}
+        rgba_map = target.get('color', rgba_map)
+        self.environment.set_color(**rgba_map, key=key)
+    
     def on_enter_inactive(self, event_data=None):
         """ Initialize the "inactive" state. """
         
-        # Destroy all objects in the environment, except the cursor.
-        keys = [k for k in self.environment if (k != 'cursor')]
+        # Destroy all objects in the environment ~~, except the cursor.~~
+        keys = [k for k in self.environment] # if (k != 'cursor')]
         for k in keys: self.environment.destroy_object(k)
         
         #pass
@@ -480,14 +529,8 @@ class Model:
         # Load the set of possible targets.
         self.load_targets(filepath=self.parameters['paths.targets'])
         
-        # Set the cursor color.
-        keys = ['r', 'g', 'b', 'a']
-        rgba_map = {k: self.parameters[f'cursor.color.{k}'] for k in keys}
-        self.environment.set_color(**rgba_map, key='cursor')
-        
-        # Set the cursor radius.
-        radius = self.parameters[f'cursor.radius']
-        self.environment.set_radius(radius, key='cursor')
+        ## Initialize the cursor.
+        #self.environment.initialize_object('cursor')
         
     def on_enter_intertrial(self, event_data=None):
         """ Initialize the "intertrial" state.
@@ -525,6 +568,10 @@ class Model:
         # Set a random target index.
         self.target_index = self.choose_random_target_index()
         
+        # Update the cursor.
+        self.update_cursor_radius()
+        self.update_cursor_color()
+        
         # Insert an automatic transition to the initial, task-specific state 
         # of a trial.
         self.to_move_a()
@@ -547,16 +594,11 @@ class Model:
     def on_enter_move_a(self, event_data=None):
         """ Initialize the "move_a" state. """
         
-        # Set the default target color.
-        # Reconsider how this is handled for the home target.
-        keys = ['r', 'g', 'b', 'a']
-        rgba_map = {k: self.parameters[f'target.color.{k}'] for k in keys}
-        self.environment.set_color(**rgba_map, key='target')
-        
-        # Set the default target radius.
-        # Reconsider how this is handled for the home target.
-        radius = self.parameters[f'target.radius']
-        self.environment.set_radius(radius, key='target')
+        # Update the target.
+        # Use the current parameter values, rather than the active target 
+        # values. The home target will always have the same appearance.
+        self.update_target_radius(from_active_target=False)
+        self.update_target_color(from_active_target=False)
         
         # Move the target to the home position.
         self.set_home_target()
@@ -593,23 +635,14 @@ class Model:
         target = self.targets[target_key]
         self.log(f'Setting target cue: {target_key}')
         
+        # Update the cue, such that it matches the appearance of the active 
+        # target (NOT the home target).
+        self.update_target_radius(key='cue')
+        self.update_target_color(key='cue')
+        
         # Set the cue position.
         xyz = target['position']
         self.environment.set_position(**xyz, key='cue')
-        
-        # Set the cue radius.
-        # Set to the radius of the active target, if specified.
-        # Otherwise, set to the default target radius.
-        radius = target.get('radius', self.parameters['target.radius'])
-        self.environment.set_radius(radius, key='cue')
-        
-        # Set the cue color.
-        # Set to the color of the active target, if specified.
-        # Otherwise, set to the default target color.
-        keys = ['r', 'g', 'b', 'a']
-        rgba_map = {k: self.parameters[f'target.color.{k}'] for k in keys}
-        rgba_map = target.get('color', rgba_map)
-        self.environment.set_color(**rgba_map, key='cue')
         
         # Set the timeout timer.
         self.set_parameterized_timeout('delay_a')
@@ -626,34 +659,19 @@ class Model:
     def on_enter_move_b(self, event_data=None):
         """ Initialize the "move_b" state. """
         
-        ## Set the outer target position.
-        #target_key = list(self.targets)[self.target_index]
-        #target = self.targets[target_key]
-        #xyz = target['position']
-        #self.environment.set_position(**xyz, key='target')
-        
         # Initialize shorthand.
         target_key = list(self.targets)[self.target_index]
         target = self.targets[target_key]
         #self.log(f'Setting target: {target_key}')
         
+        # Update the target to match the active target parameter values, or 
+        # the default target parameter values, if unspecified.
+        self.update_target_radius()
+        self.update_target_color()
+        
         # Set the target position.
         xyz = target['position']
         self.environment.set_position(**xyz, key='target')
-        
-        # Set the target radius.
-        # Set to the radius of the active target, if specified.
-        # Otherwise, set to the default target radius.
-        radius = target.get('radius', self.parameters['target.radius'])
-        self.environment.set_radius(radius, key='target')
-        
-        # Set the target color.
-        # Set to the color of the active target, if specified.
-        # Otherwise, set to the default target color.
-        keys = ['r', 'g', 'b', 'a']
-        rgba_map = {k: self.parameters[f'target.color.{k}'] for k in keys}
-        rgba_map = target.get('color', rgba_map)
-        self.environment.set_color(**rgba_map, key='target')
         
         # Set the timeout timer.
         self.set_parameterized_timeout('move_b')
@@ -678,6 +696,12 @@ class Model:
         
     def on_enter_move_c(self, event_data=None):
         """ Initialize the "move_c" state. """
+        
+        # Update the target.
+        # Use the current parameter values, rather than the active target 
+        # values. The home target will always have the same appearance.
+        self.update_target_radius(from_active_target=False)
+        self.update_target_color(from_active_target=False)
         
         # Move the target to the home position.
         self.set_home_target()
