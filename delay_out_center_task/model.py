@@ -264,14 +264,14 @@ import numpy.random
 
 # Define the default target set.
 default_targets_list \
-  = [dict(position=(+1.0, +0.0, +0.0)),
-     dict(position=(+0.0, +1.0, +0.0)),
-     dict(position=(+1.0, +1.0, +0.0)),
-     dict(position=(-1.0, -0.0, +0.0)),
-     dict(position=(-0.0, -1.0, +0.0)),
-     dict(position=(-1.0, -1.0, +0.0)),
-     dict(position=(+1.0, -1.0, +0.0)),
-     dict(position=(-1.0, +1.0, +0.0)),
+  = [dict(position=dict(x=+1.0, y=+0.0, z=+0.0)),
+     dict(position=dict(x=+0.0, y=+1.0, z=+0.0)),
+     dict(position=dict(x=+1.0, y=+1.0, z=+0.0)),
+     dict(position=dict(x=-1.0, y=-0.0, z=+0.0)),
+     dict(position=dict(x=-0.0, y=-1.0, z=+0.0)),
+     dict(position=dict(x=-1.0, y=-1.0, z=+0.0)),
+     dict(position=dict(x=+1.0, y=-1.0, z=+0.0)),
+     dict(position=dict(x=-1.0, y=+1.0, z=+0.0)),
     ]
 default_targets = {n: v for (n, v) in enumerate(default_targets_list)}
 """ Default center-out, out-center target set, with outer targets positioned 
