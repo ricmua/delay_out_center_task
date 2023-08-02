@@ -343,6 +343,7 @@ class Model:
         set_default('timeout_s.move_a',     2.000)
         set_default('timeout_s.hold_a',     0.500)
         set_default('timeout_s.delay_a',    0.500)
+        set_default('timeout_s.delay_b',    0.500)
         set_default('timeout_s.move_b',     1.000)
         set_default('timeout_s.hold_b',     0.500)
         set_default('timeout_s.move_c',     1.000)
@@ -693,6 +694,41 @@ class Model:
         
         # Reset the timeout timer.
         self.cancel_timeout()
+        
+    def on_enter_delay_b(self, event_data=None):
+        """ Initialize the "delay_b" state. """
+        
+        # Initialize the cue.
+        self.environment.initialize_sphere('cue')        
+        
+        # Initialize shorthand.
+        #target_key = list(self.targets)[self.target_index]
+        #target = self.targets[target_key]
+        self.log(f'Setting target cue: origin')
+        
+        # Update the cue, such that it matches the appearance of the active 
+        # target (NOT the home target).
+        self.update_target_radius(key='cue')
+        self.update_target_color(key='cue')
+        
+        # Set the cue position.
+        #xyz = target['position']
+        self.environment.set_position(0.0,0.0,0.0, key='cue')
+        
+        # Move the target to the home position.
+        #self.set_home_target()
+        
+        # Set the timeout timer.
+        self.set_parameterized_timeout('delay_b')
+        
+    def on_exit_delay_b(self, event_data=None):
+        """ Terminate the "delay_b" state. """
+        
+        # Reset the timeout timer.
+        self.cancel_timeout()
+        
+        # Initialize the cue.
+        self.environment.destroy_sphere('cue')    
         
     def on_enter_move_c(self, event_data=None):
         """ Initialize the "move_c" state. """

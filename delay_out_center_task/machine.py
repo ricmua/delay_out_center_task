@@ -250,6 +250,7 @@ states \
        'delay_a',
        'move_b',
        'hold_b',
+       'delay_b',
        'move_c',
        'hold_c',
       ]
@@ -278,19 +279,21 @@ state_transitions \
     + [
        dict(trigger='target_engaged',    source='move_a',     dest='hold_a'),
        dict(trigger='timeout',           source='move_a',     dest='failure'),
-       dict(trigger='target_disengaged', source='hold_a',     dest='failure'),
        dict(trigger='timeout',           source='hold_a',     dest='delay_a'),
-       dict(trigger='target_disengaged', source='delay_a',    dest='failure'),
+       dict(trigger='target_disengaged', source='hold_a',     dest='failure'),
        dict(trigger='timeout',           source='delay_a',    dest='move_b'),
-       dict(trigger='timeout',           source='move_b',     dest='failure'),
+       dict(trigger='target_disengaged', source='delay_a',    dest='failure'),
        dict(trigger='target_engaged',    source='move_b',     dest='hold_b'),
        dict(trigger='timeout',           source='move_b',     dest='failure'),
+       dict(trigger='timeout',           source='hold_b',     dest='delay_b'),
        dict(trigger='target_disengaged', source='hold_b',     dest='failure'),
-       dict(trigger='timeout',           source='hold_b',     dest='move_c'),
+       dict(trigger='timeout',           source='delay_b',    dest='move_c'),
+       dict(trigger='target_disengaged', source='delay_b',    dest='failure'),
        dict(trigger='target_engaged',    source='move_c',     dest='hold_c'),
        dict(trigger='timeout',           source='move_c',     dest='failure'),
-       dict(trigger='target_disengaged', source='hold_c',     dest='failure'),
        dict(trigger='timeout',           source='hold_c',     dest='success'),
+       dict(trigger='timeout',           source='move_c',     dest='failure'),
+       dict(trigger='target_disengaged', source='hold_c',     dest='failure'),
       ]
 """
 State transitions of the delayed center-out, out-center cursor task.
