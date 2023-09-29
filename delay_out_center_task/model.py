@@ -36,7 +36,7 @@ Accept the default values for the remaining arguments, and create the model
 class.
 
 >>> environment = Environment()
->>> model = Model(environment=environment)
+>>> model = Model(environment=environment, log=lambda m: None)
 
 Upon initialization, the environment should contain a cursor sphere with 
 default attribute values.
@@ -89,15 +89,13 @@ True
 When the model is activated, a block of trials commences. At this time, the 
 model loads a list of target parameter records. Each trial of the task 
 represents an opportunity for a subject to move to a new target chosen from 
-this list. The color of the cursor is also set. Verify the target set.
+this list. Verify the target set.
 
 >>> model.on_exit_inactive()
 >>> len(model.targets)
 8
 >>> model.targets[0]['position']
-(1.0, 0.0, 0.0)
->>> environment.get_color()
-(0.0, 1.0, 0.0, 1.0)
+{'x': 1.0, 'y': 0.0, 'z': 0.0}
 
 The intertrial period is a brief delay between trials, during which the user is 
 not provided with any prompts or expected to take any directed actions. Verify 
@@ -111,9 +109,8 @@ True
 
 Before a trial begins, the task model chooses a behavioral objective and 
 prepares the environment. Verify that a new target is initialized in the 
-environment, and that new behavioral target parameters are chosen. Also confirm 
-that the model manually requests a transition to the `move_a` state, once the 
-trial is set up. The target is colored blue, with partial transparency.
+environment. The cursor parameters are updated. The model manually requests a 
+transition to the `move_a` state, once the trial is set up.
 
 >>> target_index = model.target_index
 >>> environment.exists('target')
@@ -123,15 +120,17 @@ False
 True
 >>> model.target_index == target_index
 False
->>> environment.get_color('target')
-(0.0, 0.0, 1.0, 0.5)
+>>> environment.get_color()
+(0.0, 1.0, 0.0, 1.0)
+
 
 The first trial state in this task is the `move_a` state. During this state, a 
-target is presented to the user at a "home" or "center" position. Here, the 
-home position is set to the origin in the 3-dimensional space represented by 
-the environment. The user is expected to engage the presented target. Verify 
-that the target is moved to the home position upon entering the `move_a` state, 
-and that the state times out after a specified interval.
+target is presented to the user at a "home" or "center" position. The target 
+parameters are updated. The target is colored blue, with partial transparency. 
+Here, the home position is set to the origin in the 3-dimensional space 
+represented by the environment. The user is expected to engage the presented 
+target. Verify that the target is moved to the home position upon entering the 
+`move_a` state, and that the state times out after a specified interval.
 
 >>> delta = time_timeout(model.on_enter_move_a)
 Trigger: timeout
@@ -139,6 +138,8 @@ Trigger: timeout
 True
 >>> environment.get_position('target') == (0.0, 0.0, 0.0)
 True
+>>> environment.get_color('target')
+(0.0, 0.0, 1.0, 0.5)
 >>> model.on_exit_move_a()
 
 Upon successful completion of the `move_a` state objectives, the task is 
@@ -170,7 +171,7 @@ True
 >>> environment.exists('cue')
 True
 >>> environment.get_color('cue')
-(1.0, 0.0, 0.0, 0.5)
+(0.0, 0.0, 1.0, 0.5)
 >>> environment.get_position('cue') == environment.get_position('target')
 False
 >>> model.on_exit_delay_a()
@@ -197,6 +198,14 @@ Trigger: timeout
 >>> abs(delta - model.parameters['timeout_s.hold_b']) < tol
 True
 >>> model.on_exit_hold_b()
+
+A second delay period follows the hold period. This state is referred to as 
+`delay_b`.
+
+>>> delta = time_timeout(model.on_enter_delay_b)
+Trigger: timeout
+>>> abs(delta - model.parameters['timeout_s.delay_b']) < tol
+True
 
 The `move_c` period is nearly identical to the `move_a` period. The target is 
 returned to the center or home position upon entering the state. The user is 
@@ -240,8 +249,10 @@ As the trial ends, the target is destroyed.
 
 >>> environment.exists('target')
 True
->>> model.on_enter_trial_teardown()
+>>> delta = time_timeout(model.on_enter_trial_teardown)
 Trigger: end_trial
+>>> abs(delta - model.parameters['timeout_s.trial_teardown']) < tol
+True
 >>> environment.exists('target')
 False
 
@@ -351,6 +362,8 @@ class Model:
         set_default('timeout_s.failure',    0.200)
         set_default('timeout_s.success',    0.010)
         set_default('timeout_s.intertrial', 0.005)
+        set_default('timeout_s.trial_setup', 0.010)
+        set_default('timeout_s.trial_teardown', 0.010)
         
         # Initialize default sphere parameters.
         set_default('cursor.radius',  0.1)
@@ -381,7 +394,7 @@ class Model:
         """
         timeout_s = self.parameters[f'timeout_s.{key}']
         if timeout_s <= 0: self.trigger('timeout')
-        else: self.set_timeout(timeout_s=timeout_s)
+        else: self.set_timeout(timeout_s=timeout_s, **kwargs)
         
     def set_timeout(self, timeout_s, callback=None, start=True):
         """ Request that the timer invoke the timeout callback after the 
@@ -561,6 +574,9 @@ class Model:
         create a target. Derived classes should override this state to 
         implement some sort of automatic transition to the task-specific 
         initial state of a trial.
+        
+        In general, this could be a pass-through state, but a delay is imposed 
+        in order to allow any actions time to take effect.
         """
         
         # Create the target.
@@ -573,9 +589,18 @@ class Model:
         self.update_cursor_radius()
         self.update_cursor_color()
         
-        # Insert an automatic transition to the initial, task-specific state 
-        # of a trial.
-        self.to_move_a()
+        ## Insert an automatic transition to the initial, task-specific state 
+        ## of a trial.
+        #self.to_move_a()
+        
+        # Set the timeout timer.
+        self.set_parameterized_timeout('trial_setup', callback=self.to_move_a)
+        
+    def on_exit_trial_setup(self, event_data=None):
+        """ Terminate the "trial_setup" state. """
+        
+        # Reset the timeout timer.
+        self.cancel_timeout()
         
     def on_enter_trial_teardown(self, event_data=None):
         """ Tear-down a trial.
@@ -589,9 +614,19 @@ class Model:
         # Clear the target.
         self.environment.destroy_sphere('target')
         
-        # Automatically transition to the intertrial state.
-        self.trigger('end_trial')
+        ## Automatically transition to the intertrial state.
+        #self.trigger('end_trial')
     
+        # Set the timeout timer.
+        callback = lambda: self.trigger('end_trial')
+        self.set_parameterized_timeout('trial_teardown', callback=callback)
+        
+    def on_exit_trial_teardown(self, event_data=None):
+        """ Terminate the "trial_setup" state. """
+        
+        # Reset the timeout timer.
+        self.cancel_timeout()
+        
     def on_enter_move_a(self, event_data=None):
         """ Initialize the "move_a" state. """
         
