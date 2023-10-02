@@ -531,8 +531,8 @@ class Model:
     def on_enter_inactive(self, event_data=None):
         """ Initialize the "inactive" state. """
         
-        # Destroy all objects in the environment ~~, except the cursor.~~
-        keys = [k for k in self.environment] # if (k != 'cursor')]
+        # Destroy all objects in the environment, except the cursor.
+        keys = [k for k in self.environment if (k != 'cursor')]
         for k in keys: self.environment.destroy_object(k)
         
         #pass
