@@ -741,10 +741,11 @@ class Model:
         #target = self.targets[target_key]
         self.log(f'Setting target cue: origin')
         
-        # Update the cue, such that it matches the appearance of the active 
-        # target (NOT the home target).
-        self.update_target_radius(key='cue')
-        self.update_target_color(key='cue')
+        # Update the cue, such that it matches the appearance of the home 
+        # Use the current parameter values, rather than the active target 
+        # values. The home target will always have the same appearance.
+        self.update_target_radius(key='cue', from_active_target=False)
+        self.update_target_color(key='cue', from_active_target=False)
         
         # Set the cue position.
         #xyz = target['position']
