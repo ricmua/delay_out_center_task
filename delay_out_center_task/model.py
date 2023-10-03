@@ -360,8 +360,6 @@ class Model:
         set_default('timeout_s.failure',    0.200)
         set_default('timeout_s.success',    0.010)
         set_default('timeout_s.intertrial', 0.005)
-        #set_default('timeout_s.trial_setup', 0.010)
-        #set_default('timeout_s.trial_teardown', 0.010)
         
         # Initialize default sphere parameters.
         set_default('cursor.radius',  0.1)
@@ -593,15 +591,6 @@ class Model:
         # of a trial.
         self.to_move_a()
         
-        ## Set the timeout timer.
-        #self.set_parameterized_timeout('trial_setup', callback=self.to_move_a)
-        
-    #def on_exit_trial_setup(self, event_data=None):
-    #    """ Terminate the "trial_setup" state. """
-    #    
-    #    # Reset the timeout timer.
-    #    self.cancel_timeout()
-        
     def on_enter_trial_teardown(self, event_data=None):
         """ Tear-down a trial.
         
@@ -617,16 +606,6 @@ class Model:
         # Automatically transition to the intertrial state.
         self.trigger('end_trial')
     
-        ## Set the timeout timer.
-        #callback = lambda: self.trigger('end_trial')
-        #self.set_parameterized_timeout('trial_teardown', callback=callback)
-        
-    #def on_exit_trial_teardown(self, event_data=None):
-    #    """ Terminate the "trial_setup" state. """
-    #    
-    #    # Reset the timeout timer.
-    #    self.cancel_timeout()
-        
     def on_enter_move_a(self, event_data=None):
         """ Initialize the "move_a" state. """
         
