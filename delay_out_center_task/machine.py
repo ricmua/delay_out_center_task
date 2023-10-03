@@ -70,6 +70,8 @@ State: move_b
 >>> success = trigger('target_engaged')
 State: hold_b
 >>> success = trigger('timeout')
+State: delay_b
+>>> success = trigger('timeout')
 State: move_c
 >>> success = trigger('target_engaged')
 State: hold_c
@@ -94,6 +96,8 @@ State: delay_a
 State: move_b
 >>> success = trigger('target_engaged')
 State: hold_b
+>>> success = trigger('timeout')
+State: delay_b
 >>> success = trigger('timeout')
 State: move_c
 >>> success = trigger('target_engaged')
@@ -120,6 +124,8 @@ State: move_b
 >>> success = trigger('target_engaged')
 State: hold_b
 >>> success = trigger('timeout')
+State: delay_b
+>>> success = trigger('timeout')
 State: move_c
 >>> success = trigger('timeout')
 State: failure
@@ -142,6 +148,32 @@ State: delay_a
 State: move_b
 >>> success = trigger('target_engaged')
 State: hold_b
+>>> success = trigger('timeout')
+State: delay_b
+>>> success = trigger('target_disengaged')
+State: failure
+>>> success = trigger('timeout')
+State: trial_teardown
+>>> success = trigger('end_trial')
+State: intertrial
+
+Step through the state sequence of a trial that fails during the `delay_b` 
+phase.
+
+>>> success = trigger('timeout')
+State: trial_setup
+>>> success = machine.model.to_move_a()  # Manual transition to trial state 1.
+State: move_a
+>>> success = trigger('target_engaged')
+State: hold_a
+>>> success = trigger('timeout')
+State: delay_a
+>>> success = trigger('timeout')
+State: move_b
+>>> success = trigger('target_engaged')
+State: hold_b
+>>> success = trigger('timeout')
+State: delay_b
 >>> success = trigger('target_disengaged')
 State: failure
 >>> success = trigger('timeout')

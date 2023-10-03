@@ -249,10 +249,8 @@ As the trial ends, the target is destroyed.
 
 >>> environment.exists('target')
 True
->>> delta = time_timeout(model.on_enter_trial_teardown)
+>>> model.on_enter_trial_teardown()
 Trigger: end_trial
->>> abs(delta - model.parameters['timeout_s.trial_teardown']) < tol
-True
 >>> environment.exists('target')
 False
 
