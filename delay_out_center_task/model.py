@@ -362,8 +362,8 @@ class Model:
         set_default('timeout_s.failure',    0.200)
         set_default('timeout_s.success',    0.010)
         set_default('timeout_s.intertrial', 0.005)
-        set_default('timeout_s.trial_setup', 0.010)
-        set_default('timeout_s.trial_teardown', 0.010)
+        #set_default('timeout_s.trial_setup', 0.010)
+        #set_default('timeout_s.trial_teardown', 0.010)
         
         # Initialize default sphere parameters.
         set_default('cursor.radius',  0.1)
@@ -574,13 +574,13 @@ class Model:
         create a target. Derived classes should override this state to 
         implement some sort of automatic transition to the task-specific 
         initial state of a trial.
-        
-        In general, this could be a pass-through state, but a delay is imposed 
-        in order to allow any actions time to take effect.
         """
         
         # Create the target.
         self.environment.initialize_sphere('target')
+        
+        # Ensure that the target does not yet affect the task.
+        self.environment.set_radius(0, key='target')
         
         # Set a random target index.
         self.target_index = self.choose_random_target_index()
@@ -588,19 +588,21 @@ class Model:
         # Update the cursor.
         self.update_cursor_radius()
         self.update_cursor_color()
+        # Consider either moving this to the block level, or making it 
+        # instantaneous.
         
-        ## Insert an automatic transition to the initial, task-specific state 
-        ## of a trial.
-        #self.to_move_a()
+        # Insert an automatic transition to the initial, task-specific state 
+        # of a trial.
+        self.to_move_a()
         
-        # Set the timeout timer.
-        self.set_parameterized_timeout('trial_setup', callback=self.to_move_a)
+        ## Set the timeout timer.
+        #self.set_parameterized_timeout('trial_setup', callback=self.to_move_a)
         
-    def on_exit_trial_setup(self, event_data=None):
-        """ Terminate the "trial_setup" state. """
-        
-        # Reset the timeout timer.
-        self.cancel_timeout()
+    #def on_exit_trial_setup(self, event_data=None):
+    #    """ Terminate the "trial_setup" state. """
+    #    
+    #    # Reset the timeout timer.
+    #    self.cancel_timeout()
         
     def on_enter_trial_teardown(self, event_data=None):
         """ Tear-down a trial.
@@ -614,18 +616,18 @@ class Model:
         # Clear the target.
         self.environment.destroy_sphere('target')
         
-        ## Automatically transition to the intertrial state.
-        #self.trigger('end_trial')
+        # Automatically transition to the intertrial state.
+        self.trigger('end_trial')
     
-        # Set the timeout timer.
-        callback = lambda: self.trigger('end_trial')
-        self.set_parameterized_timeout('trial_teardown', callback=callback)
+        ## Set the timeout timer.
+        #callback = lambda: self.trigger('end_trial')
+        #self.set_parameterized_timeout('trial_teardown', callback=callback)
         
-    def on_exit_trial_teardown(self, event_data=None):
-        """ Terminate the "trial_setup" state. """
-        
-        # Reset the timeout timer.
-        self.cancel_timeout()
+    #def on_exit_trial_teardown(self, event_data=None):
+    #    """ Terminate the "trial_setup" state. """
+    #    
+    #    # Reset the timeout timer.
+    #    self.cancel_timeout()
         
     def on_enter_move_a(self, event_data=None):
         """ Initialize the "move_a" state. """
